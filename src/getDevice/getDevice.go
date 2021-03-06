@@ -38,7 +38,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 		return Response{Body: (&RequestError{"Device identifiers cannot be empty", 400}).json(), StatusCode: 400}, nil
 	}
 
-	// Requesting the device with device {id} parameter
+	// Get device from DynamoDB
 	device, err := getDevice(deviceId)
 
 	// If getDevice() returns an error

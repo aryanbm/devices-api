@@ -1,7 +1,7 @@
 # Serverless directories
 .serverless
 
-# Go-dep files
+# Go-dep lock file
 Gopkg.lock
 
 # golang output binary directory
@@ -9,3 +9,5 @@ bin
 
 # golang vendor (dependencies) directory
 vendor
+
+.todo

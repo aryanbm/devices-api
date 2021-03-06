@@ -55,7 +55,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	}
 
 	// Add device to DynamoDB Table
-	// return function message if error
+	// return createDevice() function message if error
 	_err := createDevice(&device)
 	if _err != nil {
 		return Response{Body: _err.json(), StatusCode: _err.StatusCode}, nil
