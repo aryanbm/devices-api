@@ -1,0 +1,11 @@
+# Serverless directories
+.serverless
+
+# Go-dep files
+Gopkg.lock
+
+# golang output binary directory
+bin
+
+# golang vendor (dependencies) directory
+vendor

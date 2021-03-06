@@ -1,0 +1,11 @@
+[[constraint]]
+  name = "github.com/aws/aws-lambda-go"
+  version = "1.23.0"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.37.24"
+
+[prune]
+  go-tests = true
+  unused-packages = true
