@@ -3,7 +3,7 @@
 
 ```curl -X GET https://xhu35w9l46.execute-api.us-east-1.amazonaws.com/dev/api/devices/id1 ```
 
-------------
+
 
 #### CreateDevice:
 ```
@@ -17,5 +17,3 @@ curl -X POST https://xhu35w9l46.execute-api.us-east-1.amazonaws.com/dev/api/devi
 }
 DATA
 ```
-
-------------
