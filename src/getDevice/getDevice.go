@@ -76,7 +76,7 @@ func getDevice(deviceId string) (_device *Device, _error *RequestError) {
 			},
 		},
 	})
-	// If DynamoDB returns an error
+	// If DynamoDB GetItem returns an error
 	if err != nil {
 		return nil, &RequestError{err.Error(), 500}
 	}
