@@ -27,13 +27,13 @@ func (m *stubDynamoDBClient) GetItem(input *dynamodb.GetItemInput) (*dynamodb.Ge
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
-				S: aws.String("id1"),
+				S: aws.String("/devices/id1"),
 			},
 		},
 	})
 
 	// Returns a mock device data if input matches mock input
-	if reflect.DeepEqual(input.Key, mockInput.Key) {
+	if reflect.DeepEqual(input, mockInput) {
 		mockDevice := Device{
 			Id:          "/devices/id1",
 			DeviceModel: "/devicemodels/id1",
@@ -75,7 +75,7 @@ func TestHandler(t *testing.T) {
 			// Test that the handler responds with the device data
 			// When Dynamodb cannot find the device ID
 			Request:    events.APIGatewayProxyRequest{PathParameters: map[string]string{"id": "INVALID_ID"}},
-			Expect:     "{\"message\":\"Device with id (INVALID_ID) not founded\",\"statusCode\":404}",
+			Expect:     "{\"message\":\"Device with id (/devices/INVALID_ID) not founded\",\"statusCode\":404}",
 			StatusCode: 404,
 			Err:        nil,
 		},

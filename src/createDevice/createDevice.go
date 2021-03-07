@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 )
 
 type Device struct {
@@ -22,13 +23,25 @@ type Device struct {
 	Serial      string `json:"serial"`
 }
 
-type RequestError struct {
+type ResponseMessage struct {
 	Message    string `json:"message"`
 	StatusCode int    `json:"statusCode"`
 }
 
 type Response events.APIGatewayProxyResponse
 
+// Define global DynamoDBAPI varieble, so we can change it in the unit test
+var svc dynamodbiface.DynamoDBAPI
+
+func init() {
+	//Set up a session to be used by the SDK to load
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc = dynamodb.New(sess)
+}
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 
 	// Device is used to construct the request from the client
@@ -44,15 +57,24 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	// return (Bad Request 400) if error
 	err := json.Unmarshal([]byte(request.Body), &device)
 	if err != nil {
-		return Response{Body: (&RequestError{err.Error(), 400}).json(), StatusCode: 400}, nil
+		return Response{Body: (&ResponseMessage{err.Error(), 400}).json(), StatusCode: 400}, nil
 	}
+
+	// Trim "/devices/" from id parameter
+	device.Id = strings.TrimPrefix(device.Id, "/devices/")
 
 	// Check if payloads are valid
 	// return missing payloads if error
 	missingPayloads, isValid := checkPayloads(&device)
 	if !isValid {
-		return Response{Body: (&RequestError{missingPayloads, 400}).json(), StatusCode: 400}, nil
+		return Response{Body: (&ResponseMessage{missingPayloads, 400}).json(), StatusCode: 400}, nil
 	}
+
+	/*
+		TODO:
+		Dynammodb will update other parameters if the device id already exists in the table.
+		but we can check if this device id already exists or not (with getDevice function)
+	*/
 
 	// Add device to DynamoDB Table
 	// return createDevice() function message if error
@@ -62,23 +84,15 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	}
 
 	// The device was submitted successfully
-	return Response{Body: string("device added to DynamoDB"), StatusCode: 201}, nil
+	return Response{Body: (&ResponseMessage{"device added to DynamoDB", 201}).json(), StatusCode: 201}, nil
 }
 
-func createDevice(device *Device) *RequestError {
-
-	// Set up a session to be used by the SDK to load
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
+func createDevice(device *Device) *ResponseMessage {
 
 	// Marshal Device to DynamoDB item
 	dbItem, err := dynamodbattribute.MarshalMap(device)
 	if err != nil {
-		return &RequestError{fmt.Sprintf("Error marshalling item: %v", err.Error()), 500}
+		return &ResponseMessage{fmt.Sprintf("Error marshalling item: %v", err.Error()), 500}
 	}
 
 	// Build DynamoDB PutItem input
@@ -92,7 +106,7 @@ func createDevice(device *Device) *RequestError {
 
 	// Checking if PutItem has error
 	if err != nil {
-		return &RequestError{fmt.Sprintf("DynamoDB PutItem method returned an error: %v", err.Error()), 500}
+		return &ResponseMessage{fmt.Sprintf("DynamoDB PutItem method returned an error: %v", err.Error()), 500}
 	}
 
 	// Everything is okay, so we can return function without error
@@ -131,7 +145,8 @@ func checkPayloads(device *Device) (message string, isValid bool) {
 	return "the inputs are valid", true
 }
 
-func (e *RequestError) json() string {
+// Generate a JSON string from ResponseMessage
+func (e *ResponseMessage) json() string {
 	json, _ := json.Marshal(e)
 	return string(json)
 }

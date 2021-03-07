@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -22,7 +23,7 @@ type Device struct {
 	Serial      string `json:"serial"`
 }
 
-type RequestError struct {
+type ResponseMessage struct {
 	Message    string `json:"message"`
 	StatusCode int    `json:"statusCode"`
 }
@@ -49,7 +50,12 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 
 	// If the get parameter is empty
 	if deviceId == "" {
-		return Response{Body: (&RequestError{"Device identifiers cannot be empty", 400}).json(), StatusCode: 400}, nil
+		return Response{Body: (&ResponseMessage{"Device identifiers cannot be empty", 400}).json(), StatusCode: 400}, nil
+	}
+
+	// Add "/devices/" to the beginning of id parameter
+	if !strings.HasPrefix(deviceId, "/devices/") {
+		deviceId = "/devices/" + deviceId
 	}
 
 	// Get device from DynamoDB
@@ -66,7 +72,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 	return Response{Body: string(deviceString), StatusCode: 200}, nil
 }
 
-func getDevice(deviceId string) (_device *Device, _error *RequestError) {
+func getDevice(deviceId string) (_device *Device, _error *ResponseMessage) {
 	// search for deviceId in DynammoDB Table
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
@@ -78,28 +84,27 @@ func getDevice(deviceId string) (_device *Device, _error *RequestError) {
 	})
 	// If DynamoDB GetItem returns an error
 	if err != nil {
-		return nil, &RequestError{err.Error(), 500}
+		return nil, &ResponseMessage{err.Error(), 500}
 	}
 
 	// Device {id} is not founded
 	if result.Item == nil {
-		return nil, &RequestError{fmt.Sprintf("Device with id (%v) not founded", deviceId), 404}
+		return nil, &ResponseMessage{fmt.Sprintf("Device with id (%v) not founded", deviceId), 404}
 	}
 
 	device := Device{}
 	// Unmarshalling the query result into a Device type
 	err = dynamodbattribute.UnmarshalMap(result.Item, &device)
 	if err != nil {
-		// TODO: check if the program is under DEV state then return complete error
-		// else return "Internal Error"
-		return nil, &RequestError{fmt.Sprintf("Failed to unmarshal Record, %v", err), 500}
+		return nil, &ResponseMessage{fmt.Sprintf("Failed to unmarshal Record, %v", err), 500}
 	}
 
 	// Everything is okay, so we can return the device.
 	return &device, nil
 }
 
-func (e *RequestError) json() string {
+// Generate a JSON string from ResponseMessage
+func (e *ResponseMessage) json() string {
 	json, _ := json.Marshal(e)
 	return string(json)
 }
