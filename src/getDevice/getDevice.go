@@ -53,10 +53,8 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 		return Response{Body: (&ResponseMessage{"Device identifiers cannot be empty", 400}).json(), StatusCode: 400}, nil
 	}
 
-	// Add "/devices/" to the beginning of id parameter
-	if !strings.HasPrefix(deviceId, "/devices/") {
-		deviceId = "/devices/" + deviceId
-	}
+	// Trim "/devices/" from id parameter
+	deviceId = strings.TrimPrefix(deviceId, "/devices/")
 
 	// Get device from DynamoDB
 	device, err := getDevice(deviceId)
@@ -98,6 +96,9 @@ func getDevice(deviceId string) (_device *Device, _error *ResponseMessage) {
 	if err != nil {
 		return nil, &ResponseMessage{fmt.Sprintf("Failed to unmarshal Record, %v", err), 500}
 	}
+
+	// Add "/devices/" to the beginning of id parameter
+	device.Id = "/devices/" + device.Id
 
 	// Everything is okay, so we can return the device.
 	return &device, nil
