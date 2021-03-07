@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 )
 
 type Device struct {
@@ -27,6 +28,19 @@ type RequestError struct {
 }
 
 type Response events.APIGatewayProxyResponse
+
+var svc dynamodbiface.DynamoDBAPI
+
+// Define global variebles, so we can change them in test coverage
+func init() {
+	//Set up a session to be used by the SDK to load
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// Create DynamoDB client
+	svc = dynamodb.New(sess)
+}
 
 func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 
@@ -53,15 +67,6 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 }
 
 func getDevice(deviceId string) (_device *Device, _error *RequestError) {
-
-	//Set up a session to be used by the SDK to load
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
 	// GetItem from DynammoDB
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
@@ -71,7 +76,6 @@ func getDevice(deviceId string) (_device *Device, _error *RequestError) {
 			},
 		},
 	})
-
 	// If DynamoDB returns an error
 	if err != nil {
 		return nil, &RequestError{err.Error(), 500}
