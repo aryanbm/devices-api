@@ -7,7 +7,7 @@
   version = "1.37.24"
 
 [[constraint]]
-  name = "github.com/stretchr/testify/assert"
+  name = "github.com/stretchr/testify"
   version = "1.7.0"
 
 
