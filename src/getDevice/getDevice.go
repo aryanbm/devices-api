@@ -29,9 +29,9 @@ type RequestError struct {
 
 type Response events.APIGatewayProxyResponse
 
+// Define global DynamoDBAPI varieble, so we can change it in the unit test
 var svc dynamodbiface.DynamoDBAPI
 
-// Define global variebles, so we can change them in test coverage
 func init() {
 	//Set up a session to be used by the SDK to load
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
