@@ -67,7 +67,7 @@ func Handler(request events.APIGatewayProxyRequest) (Response, error) {
 }
 
 func getDevice(deviceId string) (_device *Device, _error *RequestError) {
-	// GetItem from DynammoDB
+	// search for deviceId in DynammoDB Table
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{
