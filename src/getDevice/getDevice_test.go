@@ -15,7 +15,7 @@ import (
 
 // Package dynamodbiface provides an interface to enable
 // mocking the Amazon DynamoDB service client for testing our code.
-// In this case we define a mock struct to be used in our unit tests of createDevice()
+// In this case we define a mock struct to be used in our unit tests of getDevice()
 type stubDynamoDBClient struct {
 	dynamodbiface.DynamoDBAPI
 }
@@ -54,42 +54,45 @@ func TestHandler(t *testing.T) {
 
 	// Put the mocked DynamoDB API in place of the main DynamoDB API.
 	mDynamodb := &stubDynamoDBClient{}
-
-	// Change getDevice.go DynamodbAPI to mocked version
 	svc = mDynamodb
 
 	// Test Cases
 	tests := []struct {
-		request events.APIGatewayProxyRequest
-		expect  string
-		err     error
+		Request    events.APIGatewayProxyRequest
+		Expect     string
+		StatusCode int
+		Err        error
 	}{
 		{
 			// Test that the handler responds the device data
 			// When Dynamodb finds the device ID
-			request: events.APIGatewayProxyRequest{PathParameters: map[string]string{"id": "id1"}},
-			expect:  "{\"id\":\"/devices/id1\",\"deviceModel\":\"/devicemodels/id1\",\"name\":\"Sensor\",\"note\":\"Testing a sensor\",\"serial\":\"A020000102\"}",
-			err:     nil,
+			Request:    events.APIGatewayProxyRequest{PathParameters: map[string]string{"id": "id1"}},
+			Expect:     "{\"id\":\"/devices/id1\",\"deviceModel\":\"/devicemodels/id1\",\"name\":\"Sensor\",\"note\":\"Testing a sensor\",\"serial\":\"A020000102\"}",
+			StatusCode: 200,
+			Err:        nil,
 		},
 		{
 			// Test that the handler responds with the device data
 			// When Dynamodb cannot find the device ID
-			request: events.APIGatewayProxyRequest{PathParameters: map[string]string{"id": "INVALID_ID"}},
-			expect:  "{\"message\":\"Device with id (INVALID_ID) not founded\",\"statusCode\":404}",
-			err:     nil,
+			Request:    events.APIGatewayProxyRequest{PathParameters: map[string]string{"id": "INVALID_ID"}},
+			Expect:     "{\"message\":\"Device with id (INVALID_ID) not founded\",\"statusCode\":404}",
+			StatusCode: 404,
+			Err:        nil,
 		},
 		{
 			// Test that the handler responds Bad Request 400
 			// when no id is provided in the request body
-			request: events.APIGatewayProxyRequest{},
-			expect:  "{\"message\":\"Device identifiers cannot be empty\",\"statusCode\":400}",
-			err:     nil,
+			Request:    events.APIGatewayProxyRequest{},
+			Expect:     "{\"message\":\"Device identifiers cannot be empty\",\"statusCode\":400}",
+			StatusCode: 400,
+			Err:        nil,
 		},
 	}
 
 	for _, test := range tests {
-		response, err := Handler(test.request)
-		assert.IsType(t, test.err, err)
-		assert.Equal(t, test.expect, response.Body)
+		response, err := Handler(test.Request)
+		assert.IsType(t, test.Err, err)
+		assert.Equal(t, test.Expect, response.Body)
+		assert.Equal(t, test.StatusCode, response.StatusCode)
 	}
 }
