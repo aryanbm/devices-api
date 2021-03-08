@@ -11,7 +11,7 @@ An example of how to implement a Restful API on AWS by utilizing the following t
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
+## Prerequisites
 
 ##### 1. Go Language
 First you need to install Go language on your system,
