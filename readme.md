@@ -63,6 +63,8 @@ You can test `getDevice` and `createDevice` unit tests with the following comman
 go test ./src/getDevice/
 go test ./src/createDevice/
 ```
+or
+`make test`
 
 ## Testing API
 
