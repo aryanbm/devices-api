@@ -19,7 +19,7 @@ On this website you can find installation instructions based on your system OS:
 https://golang.org/doc/install
 
 ##### 2. Go Dep
-Go dep helps us manage our dependencies,
+Go dep will helps us manage our dependencies,
 you can install go-dep on your system with the following command
 
 ```
