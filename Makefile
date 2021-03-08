@@ -10,3 +10,7 @@ clean:
 
 deploy: clean build
 	sls deploy --verbose
+
+test:
+	go test ./src/getDevice/
+	go test ./src/createDevice/
