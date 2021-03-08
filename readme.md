@@ -53,7 +53,9 @@ or you can just use `make build`
 serverless deploy --verbose
 ```
 or
-`make deploy`
+```
+make deploy
+```
 
 ## Running the tests
 Test covarages are available in cover.html files
@@ -64,7 +66,9 @@ go test ./src/getDevice/
 go test ./src/createDevice/
 ```
 or
-`make test`
+```
+make test
+```
 
 ## Testing API
 
