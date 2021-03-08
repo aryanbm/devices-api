@@ -1,13 +1,13 @@
 # Test API
 #### GetDevice:
 
-```curl -X GET https://xhu35w9l46.execute-api.us-east-1.amazonaws.com/dev/api/devices/id1 ```
+```curl -X GET https://<api-gateway-url>/api/devices/id1 ```
 
 
 
 #### CreateDevice:
 ```
-curl -X POST https://xhu35w9l46.execute-api.us-east-1.amazonaws.com/dev/api/devices/ -H "Content-Type: application/json" --data-binary @- <<DATA
+curl -X POST https://<api-gateway-url>/api/devices/ -H "Content-Type: application/json" --data-binary @- <<DATA
 {
     "id": "/devices/id1",
     "deviceModel": "/devicesmodels/id1",
