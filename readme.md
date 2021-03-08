@@ -7,6 +7,17 @@ An example of how to implement a Restful API on AWS by utilizing the following t
 * [AWS Lambda](https://aws.amazon.com/lambda/)
 * [AWS DynamoDB](https://aws.amazon.com/dynamodb/)
 
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#installing-and-deployment">Installing and Deployment</a></li>
+    <li><a href="#testing-api">Testing API</a></li>
+  </ol>
+</details>
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
@@ -31,7 +42,7 @@ Install via npm:
 npm install -g serverless
 ```
 
-### Installing and Deployment
+## Installing and Deployment
 
 1. Clone the repo
 ```
