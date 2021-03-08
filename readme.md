@@ -6,7 +6,7 @@ An example of how to implement a Restful API on AWS by utilizing the following t
 * [AWS API Gateway](https://aws.amazon.com/api-gateway/)
 * [AWS Lambda](https://aws.amazon.com/lambda/)
 * [AWS DynamoDB](https://aws.amazon.com/dynamodb/)
-
+---
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
