@@ -1,0 +1,16 @@
+mode: set
+std/Projects/devicesapi/src/getDevice/getDevice.go:36.13,44.2 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:46.71,52.20 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:57.2,63.16 3 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:68.2,70.67 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:52.20,54.3 1 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:63.16,65.3 1 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:73.76,84.16 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:89.2,89.24 1 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:93.2,96.16 3 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:101.2,104.21 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:84.16,86.3 1 0
+std/Projects/devicesapi/src/getDevice/getDevice.go:89.24,91.3 1 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:96.16,98.3 1 0
+std/Projects/devicesapi/src/getDevice/getDevice.go:108.41,111.2 2 1
+std/Projects/devicesapi/src/getDevice/getDevice.go:113.13,115.2 1 0

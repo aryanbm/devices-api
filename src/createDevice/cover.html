@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">std/Projects/devicesapi/src/createDevice/createDevice.go (82.9%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/json"
+        "fmt"
+        "os"
+        "strings"
+
+        "github.com/aws/aws-lambda-go/events"
+        "github.com/aws/aws-lambda-go/lambda"
+        "github.com/aws/aws-sdk-go/aws"
+        "github.com/aws/aws-sdk-go/aws/session"
+        "github.com/aws/aws-sdk-go/service/dynamodb"
+        "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+        "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+)
+
+type Device struct {
+        Id          string `json:"id"`
+        DeviceModel string `json:"deviceModel"`
+        Name        string `json:"name"`
+        Note        string `json:"note"`
+        Serial      string `json:"serial"`
+}
+
+type ResponseMessage struct {
+        Message    string `json:"message"`
+        StatusCode int    `json:"statusCode"`
+}
+
+type Response events.APIGatewayProxyResponse
+
+// Define global DynamoDBAPI varieble, so we can change it in the unit test
+var svc dynamodbiface.DynamoDBAPI
+
+func init() <span class="cov8" title="1">{
+        //Set up a session to be used by the SDK to load
+        sess := session.Must(session.NewSessionWithOptions(session.Options{
+                SharedConfigState: session.SharedConfigEnable,
+        }))
+
+        // Create DynamoDB client
+        svc = dynamodb.New(sess)
+}</span>
+func Handler(request events.APIGatewayProxyRequest) (Response, error) <span class="cov8" title="1">{
+
+        // Device is used to construct the request from the client
+        device := Device{
+                Id:          "",
+                DeviceModel: "",
+                Name:        "",
+                Note:        "",
+                Serial:      "",
+        }
+
+        // Unmarshal the Request body
+        // return (Bad Request 400) if error
+        err := json.Unmarshal([]byte(request.Body), &amp;device)
+        if err != nil </span><span class="cov0" title="0">{
+                return Response{Body: (&amp;ResponseMessage{err.Error(), 400}).json(), StatusCode: 400}, nil
+        }</span>
+
+        // Trim "/devices/" from id parameter
+        <span class="cov8" title="1">device.Id = strings.TrimPrefix(device.Id, "/devices/")
+
+        // Check if payloads are valid
+        // return missing payloads if error
+        missingPayloads, isValid := checkPayloads(&amp;device)
+        if !isValid </span><span class="cov8" title="1">{
+                return Response{Body: (&amp;ResponseMessage{missingPayloads, 400}).json(), StatusCode: 400}, nil
+        }</span>
+
+        /*
+                TODO:
+                Dynammodb will update other parameters if the device id already exists in the table.
+                but we can check if this device id already exists or not (with getDevice function)
+        */
+
+        // Add device to DynamoDB Table
+        // return createDevice() function message if error
+        <span class="cov8" title="1">_err := createDevice(&amp;device)
+        if _err != nil </span><span class="cov8" title="1">{
+                return Response{Body: _err.json(), StatusCode: _err.StatusCode}, nil
+        }</span>
+
+        // The device was submitted successfully
+        <span class="cov8" title="1">return Response{Body: (&amp;ResponseMessage{"device added to DynamoDB", 201}).json(), StatusCode: 201}, nil</span>
+}
+
+func createDevice(device *Device) *ResponseMessage <span class="cov8" title="1">{
+
+        // Marshal Device to DynamoDB item
+        dbItem, err := dynamodbattribute.MarshalMap(device)
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;ResponseMessage{fmt.Sprintf("Error marshalling item: %v", err.Error()), 500}
+        }</span>
+
+        // Build DynamoDB PutItem input
+        <span class="cov8" title="1">input := &amp;dynamodb.PutItemInput{
+                Item:      dbItem,
+                TableName: aws.String(os.Getenv("TABLE_NAME")),
+        }
+
+        // Asking DynamoDB client to put the item
+        _, err = svc.PutItem(input)
+
+        // Checking if PutItem has error
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;ResponseMessage{fmt.Sprintf("DynamoDB PutItem method returned an error: %v", err.Error()), 500}
+        }</span>
+
+        // Everything is okay, so we can return function without error
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Check payloads to make sure they are not missing
+func checkPayloads(device *Device) (message string, isValid bool) <span class="cov8" title="1">{
+        var mp []string // Missing payloads
+
+        if device.Id == "" </span><span class="cov8" title="1">{
+                mp = append(mp, "Id") // Id is missing
+        }</span>
+        <span class="cov8" title="1">if device.DeviceModel == "" </span><span class="cov8" title="1">{
+                mp = append(mp, "DeviceModel") // DeviceModel is missing
+        }</span>
+        <span class="cov8" title="1">if device.Name == "" </span><span class="cov0" title="0">{
+                mp = append(mp, "Name") // Name is missing
+        }</span>
+        <span class="cov8" title="1">if device.Note == "" </span><span class="cov0" title="0">{
+                mp = append(mp, "Note") // Note is missing
+        }</span>
+        <span class="cov8" title="1">if device.Serial == "" </span><span class="cov0" title="0">{
+                mp = append(mp, "Serial") // Serial is missing
+        }</span>
+
+        // If any of the payloads are missing
+        <span class="cov8" title="1">if len(mp) &gt; 0 </span><span class="cov8" title="1">{
+                if len(mp) == 1 </span><span class="cov0" title="0">{
+                        return fmt.Sprintf("{%v} is missing", mp[0]), false
+                }</span>
+
+                <span class="cov8" title="1">return fmt.Sprintf("{%v} are missing", strings.Join(mp, ", ")), false</span>
+        }
+
+        <span class="cov8" title="1">return "the inputs are valid", true</span>
+}
+
+// Generate a JSON string from ResponseMessage
+func (e *ResponseMessage) json() string <span class="cov8" title="1">{
+        json, _ := json.Marshal(e)
+        return string(json)
+}</span>
+
+func main() <span class="cov0" title="0">{
+        lambda.Start(Handler)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
