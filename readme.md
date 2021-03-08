@@ -1,4 +1,4 @@
-# Simple Restful API on AWS with Go Language and Serverless Framework
+# Simple Restful API on AWS with Serverless Framework and Go Language
 
 An example of how to implement a Restful API on AWS by utilizing the following tech stack:
 * [Serverless Framework](https://serverless.com)
